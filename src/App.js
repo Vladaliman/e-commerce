@@ -64,7 +64,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
             handleEmptyCart={handleEmptyCart}/>
           </Route>
           <Route exact path='/checkout'>
-            <Checkout />
+            <Checkout cart={cart}/>
           </Route>
         </Switch>
       </div>
