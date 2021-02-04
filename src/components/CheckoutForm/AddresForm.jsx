@@ -1,9 +1,11 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {InputLabel, Select, MenuItem, Button, Grid, Typography} from '@material-ui/core'
 import {useForm, FormProvider} from 'react-hook-form'
 import FormInput from './CustomTextField'
 
-const AddresForm = () => {
+import {commerce} from '../../lib/commerce'
+
+const AddresForm = ({checkoutToken}) => {
     const [shippingCountries, setShippingCountries] = useState([])
     const [shippingCountry, setShippingCountry] = useState('')
     const [shippingSubdivisions, setSubdivisions] = useState([])
@@ -11,6 +13,19 @@ const AddresForm = () => {
     const [shippingOptions, setOptions] = useState([])
     const [shippingOption, setOption] = useState('')
     
+    const countries = Object.entries(shippingCountries).map(([code, name]) =>({id:code, label:name}))
+    console.log(countries)
+
+    const fetchShippingCountries = async (checkoutTokenId) => {
+        const { countries } = await commerce.services.localeListShippingCountries(checkoutTokenId);
+        setShippingCountries(countries);
+        setShippingCountry(Object.keys(countries)[0]);
+      };
+
+    useEffect(() => {
+        fetchShippingCountries(checkoutToken.id)
+    }, [])
+
     const methods = useForm()
     return (
         <>
@@ -26,8 +41,12 @@ const AddresForm = () => {
                         <FormInput required name='ZIP' label='ZIP / Postal Code' />
                         <Grid item xs={12} sm={6}>
                             <InputLabel>Shipping Country</InputLabel>
-                            <Select value={} fullWidth onChange={} >
-                                <MenuItem key={} value={} >Select</MenuItem>
+                            <Select value={shippingCountry} fullWidth onChange={(e) => setShippingCountry(e.target.value)}>
+                                {Object.entries(shippingCountries).map(([code, name]) => ({ id: code, label: name })).map((item) => (
+                                <MenuItem key={item.id} value={item.id}>
+                                {item.label}
+                                </MenuItem>
+                                 ))}
                             </Select>
                         </Grid>
                     </Grid>
