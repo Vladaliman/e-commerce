@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom'
 
 import {commerce} from '../../lib/commerce'
 
-const AddresForm = ({checkoutToken}) => {
+const AddresForm = ({checkoutToken, test}) => {
     const [shippingCountries, setShippingCountries] = useState([])
     const [shippingCountry, setShippingCountry] = useState('')
     const [shippingSubdivisions, setShippingSubdivisions] = useState([])
@@ -14,18 +14,15 @@ const AddresForm = ({checkoutToken}) => {
     const [shippingOptions, setShippingOptions] = useState([])
     const [shippingOption, setShippingOption] = useState('')
     
-    const countries = Object.entries(shippingCountries).map(([code, name]) =>({id:code, label:name}))
-    const subdivisions = Object.entries(shippingSubdivisions).map(([code, name]) =>({id:code, label:name}))
 
+const methods = useForm()
+    
     const fetchShippingCountries = async (checkoutTokenId) => {
         const { countries } = await commerce.services.localeListShippingCountries(checkoutTokenId);
         setShippingCountries(countries);
         setShippingCountry(Object.keys(countries)[0]);
       };
 
-    useEffect(() => {
-        fetchShippingCountries(checkoutToken.id)
-    }, [])
 
     const fetchSubdivisions = async (countryCode) => {
         const {subdivisions} = await commerce.services.localeListSubdivisions(countryCode);
@@ -42,6 +39,10 @@ const AddresForm = ({checkoutToken}) => {
         setShippingOption(options[0].id);
       };
 
+    useEffect(() => {
+        fetchShippingCountries(checkoutToken.id)
+    }, [])
+
     useEffect(()=>{
       if(shippingCountry)  fetchSubdivisions(shippingCountry)
     }, [shippingCountry])
@@ -50,12 +51,12 @@ const AddresForm = ({checkoutToken}) => {
         if (shippingSubdivision) fetchShippingOptions(checkoutToken.id, shippingCountry, shippingSubdivision);
       }, [shippingSubdivision]);
 
-    const methods = useForm()
+    
     return (
         <>
             <Typography variant='h6' gutterBottom>Shipping Addres</Typography>
             <FormProvider {...methods}>
-                <from onSubmit=''>
+                <form onSubmit={methods.handleSubmit((data) => test({ ...data, shippingCountry, shippingSubdivision, shippingOption }))}>
                     <Grid container spacing={3}>
                         <FormInput required name='firstName' label='First Name' />
                         <FormInput required name='lastName' label='Last Name' />
@@ -100,7 +101,7 @@ const AddresForm = ({checkoutToken}) => {
                         <Button component={Link} variant="outlined" to="/cart">Back to Cart</Button>
                         <Button type="submit" variant="contained" color="primary">Next</Button>
                     </div>
-                </from>
+                </form>
             </FormProvider>
         </>
     )
